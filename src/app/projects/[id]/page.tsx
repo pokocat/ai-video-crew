@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import ReelPlayer from "@/components/ReelPlayer";
+import { isClientMock } from "@/lib/clientEngine";
+import { getLocalProject, subscribeLocal } from "@/lib/clientStore";
 import { CREW_BY_ID, type CrewId } from "@/lib/crew";
 import { MODE_BY_ID } from "@/lib/modes";
 import type {
@@ -33,6 +35,17 @@ export default function ProjectPage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
+    if (isClientMock) {
+      // Read live from the browser store (updated by the client engine).
+      const sync = () => {
+        const p = getLocalProject(id);
+        if (p) setProject(p);
+        else setNotFound(true);
+      };
+      sync();
+      return subscribeLocal(sync);
+    }
+
     let active = true;
     let timer: ReturnType<typeof setInterval> | null = null;
     const load = async () => {

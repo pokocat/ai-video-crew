@@ -29,8 +29,9 @@ ViMax 用四个智能体（Screenwriter / Director / Producer / Video Generator�
 - **Next.js (App Router) + TypeScript + Tailwind CSS v4**
 - 进程内任务编排引擎，逐阶段驱动剧组并流式输出日志
 - **可插拔生成后端**：统一的 `GenerationProvider` 接口
-  - `mock`（默认）：内置模拟剧组，完全离线、无需 API key，立即可演示
-  - `vimax`：转发到真实的 ViMax Python worker（需 Gemini / Veo 等 API key）
+  - `mock`（默认）：内置模拟剧组，完全离线、无需 API key。**在浏览器端运行**并用
+    `localStorage` 持久化，因此可直接部署到无状态 / Serverless 平台（如 Vercel），无需数据库
+  - `vimax`：转发到真实的 ViMax Python worker（需 Gemini / Veo 等 API key），由服务端编排
 
 ## 快速开始
 

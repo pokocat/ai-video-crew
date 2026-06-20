@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { isClientMock } from "@/lib/clientEngine";
+import { listLocalProjects, subscribeLocal } from "@/lib/clientStore";
 import { MODE_BY_ID } from "@/lib/modes";
 import type { Project, VideoArtifact } from "@/lib/types";
 
@@ -30,6 +32,15 @@ export default function ProjectsPage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    if (isClientMock) {
+      const sync = () => {
+        setProjects(listLocalProjects());
+        setLoaded(true);
+      };
+      sync();
+      return subscribeLocal(sync);
+    }
+
     let active = true;
     const load = async () => {
       const res = await fetch("/api/projects");

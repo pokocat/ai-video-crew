@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
+import { createLocalProject, isClientMock, runLocalPipeline } from "@/lib/clientEngine";
 import { MODE_BY_ID, MODES, STYLE_PRESETS, type ModeId } from "@/lib/modes";
 
 function CreateForm() {
@@ -37,18 +38,28 @@ function CreateForm() {
       return;
     }
     setSubmitting(true);
+    const input = {
+      title: title.trim() || prompt.trim().slice(0, 24) || "未命名作品",
+      mode,
+      prompt: prompt.trim(),
+      style: style.trim() || STYLE_PRESETS[0],
+      userRequirement: requirement.trim(),
+      referenceImage: cfg.acceptsReference ? reference : undefined,
+    };
+
     try {
+      if (isClientMock) {
+        // Mock crew runs entirely in the browser — no server state needed.
+        const project = createLocalProject(input);
+        void runLocalPipeline(project.id);
+        router.push(`/projects/${project.id}`);
+        return;
+      }
+      // Real ViMax provider: orchestrate on the server.
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          title,
-          mode,
-          prompt,
-          style,
-          userRequirement: requirement,
-          referenceImage: cfg.acceptsReference ? reference : undefined,
-        }),
+        body: JSON.stringify(input),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "提交失败");

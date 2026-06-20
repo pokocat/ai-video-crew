@@ -29,3 +29,4 @@ yarn-error.log*
 
 # runtime working dir (ViMax-style)
 /.working_dir/
+.vercel
